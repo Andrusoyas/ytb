@@ -10,13 +10,15 @@ COPY . /app
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install ffmpeg for voice/audio
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# Install ffmpeg for voice/audio support
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set environment variables (Coolify will override from .env)
+# Environment variables (Coolify can override via .env)
 ENV DISCORD_TOKEN=""
 ENV PREFIX="!"
 ENV BOT_FILE="main.py"
 
-# Entrypoint: run the bot
+# Run the bot
 CMD ["sh", "-c", "python $BOT_FILE"]
