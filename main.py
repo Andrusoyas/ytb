@@ -23,9 +23,7 @@ FFMPEG_OPTIONS = {
     "options": "-vn"
 }
 
-
 # ───────── YT-DLP HELPER ─────────
-
 async def ytdlp_get_audio(query: str):
     """Use yt-dlp in a thread, return (audio_url, title)."""
     ydl_opts = {
@@ -47,14 +45,11 @@ async def ytdlp_get_audio(query: str):
     audio_url, title = await loop.run_in_executor(None, _run)
     return audio_url, title
 
-
 # ───────── EVENTS ─────────
-
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})")
     print("------")
-
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.CommandError):
@@ -66,9 +61,7 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError):
     print("=== COMMAND ERROR END ===")
     await ctx.send(f"❌ {original}")
 
-
 # ───────── VOICE HELPERS ─────────
-
 async def connect_to_user_voice(ctx: commands.Context) -> discord.VoiceClient:
     if not ctx.author.voice or not ctx.author.voice.channel:
         await ctx.send("❌ You must be in a voice channel to use this.")
@@ -77,46 +70,37 @@ async def connect_to_user_voice(ctx: commands.Context) -> discord.VoiceClient:
     user_channel = ctx.author.voice.channel
     vc = ctx.voice_client
 
-    if vc is None:
-        try:
+    try:
+        if vc is None:
             vc = await user_channel.connect()
-        except Exception as e:
-            print("VOICE CONNECT ERROR:", repr(e))
-            await ctx.send(
-                "❌ I couldn't join your voice channel. "
-                "This is a **hosting / server voice issue**. "
-                f"Error: `{e}`"
-            )
-            return None
-    elif vc.channel != user_channel:
-        try:
+        elif vc.channel != user_channel:
             await vc.move_to(user_channel)
-        except Exception as e:
-            print("VOICE MOVE ERROR:", repr(e))
-            await ctx.send(
-                "❌ I couldn't move to your voice channel. "
-                f"Error: `{e}`"
-            )
-            return None
+    except discord.ClientException as e:
+        await ctx.send(f"❌ Voice connection failed: {e}")
+        return None
+    except Exception as e:
+        print("VOICE ERROR:", repr(e))
+        await ctx.send(
+            "❌ I couldn't join your voice channel. "
+            "This may be a hosting/server limitation."
+        )
+        return None
 
     if not vc.is_connected():
         await ctx.send(
             "❌ I'm still not connected to voice. "
-            "Your host likely does not support Discord voice in this container."
+            "Your host likely does not support Discord voice."
         )
         return None
 
     return vc
 
-
 # ───────── COMMANDS ─────────
-
 @bot.command()
 async def join(ctx: commands.Context):
     vc = await connect_to_user_voice(ctx)
-    if vc is not None:
+    if vc:
         await ctx.send(f"✅ Joined **{vc.channel}**")
-
 
 @bot.command()
 async def leave(ctx: commands.Context):
@@ -125,7 +109,6 @@ async def leave(ctx: commands.Context):
         return await ctx.send("❌ I'm not in a voice channel.")
     await vc.disconnect()
     await ctx.send("👋 Disconnected.")
-
 
 @bot.command()
 async def play(ctx: commands.Context, *, query: str):
@@ -155,7 +138,6 @@ async def play(ctx: commands.Context, *, query: str):
         print("ERROR in play():", repr(e))
         await status_msg.edit(content=f"❌ Play failed: `{e}`")
 
-
 @bot.command()
 async def stop(ctx: commands.Context):
     vc = ctx.voice_client
@@ -164,7 +146,5 @@ async def stop(ctx: commands.Context):
     vc.stop()
     await ctx.send("⏹️ Stopped.")
 
-
 # ───────── RUN BOT ─────────
-
 bot.run(TOKEN)
