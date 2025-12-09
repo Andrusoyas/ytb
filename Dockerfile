@@ -21,4 +21,5 @@ ENV PREFIX="!"
 ENV BOT_FILE="main.py"
 
 # Run the bot
-CMD ["sh", "-c", "python $BOT_FILE"]
+CMD ["python", "main.py"]
+
