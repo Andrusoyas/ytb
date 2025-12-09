@@ -4,18 +4,18 @@ FROM python:3.12-slim
 # ─── Set working directory ───
 WORKDIR /app
 
-# ─── Copy files ───
+# ─── Copy project files ───
 COPY . /app
 
 # ─── Install dependencies ───
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ─── Expose ports if needed (Discord bot usually does not need this) ───
-# EXPOSE 8080
+# ─── Install ffmpeg (required for voice/audio) ───
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
-# ─── Set environment variables from .env automatically (optional) ───
-# ENV DISCORD_TOKEN=${DISCORD_TOKEN}
-# ENV PREFIX=${PREFIX}
+# ─── Set environment variables (from .env) ───
+ENV DISCORD_TOKEN=${DISCORD_TOKEN}
+ENV PREFIX=${PREFIX}
 
-# ─── Run bot ───
-CMD ["python", "bot.py"]
+# ─── Run the bot (adjust path to your app.py) ───
+CMD ["python", "bot/app.py"]
