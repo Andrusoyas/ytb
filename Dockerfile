@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy project files
 COPY . /app
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies including python-dotenv
+RUN pip install --no-cache-dir -r requirements.txt python-dotenv
 
 # Install ffmpeg for voice/audio support
 RUN apt-get update && \
@@ -22,4 +22,3 @@ ENV BOT_FILE="main.py"
 
 # Run the bot
 CMD ["python", "main.py"]
-
